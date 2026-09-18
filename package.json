@@ -1,0 +1,24 @@
+{
+  "name": "portalpapadobrado",
+  "version": "1.0.0",
+  "description": "Repositório do projeto do sistema Papa Dobrado",
+  "scripts": {
+    "dev": "node --watch --env-file .env src/server.js",
+    "start": "node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alewnardu/portalpapadobrado.git"
+  },
+  "keywords": [],
+  "author": "Leonardo Araújo",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/alewnardu/portalpapadobrado/issues"
+  },
+  "homepage": "https://github.com/alewnardu/portalpapadobrado#readme",
+  "devDependencies": {
+    "prisma": "^7.10.0"
+  }
+}

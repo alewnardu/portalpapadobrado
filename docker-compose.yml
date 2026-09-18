@@ -12,10 +12,24 @@ services:
     volumes:
       - portalpapadobrado_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 5s
       timeout: 5s
       retries: 5
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: portalpapadobrado_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "51212:51212"
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   portalpapadobrado_data:
