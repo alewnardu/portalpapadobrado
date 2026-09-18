@@ -15,15 +15,15 @@ datasource db {
 model Usuario {
   id              Int      @id @default(autoincrement())
   publicId        String   @unique @default(uuid()) @map("public_id") @db.Uuid
-  peladeiroId Int       @unique @map("peladeiro_id")
-  username            String   @db.VarChar(50)
+  peladeiroId     Int      @unique @map("peladeiro_id")
+  username        String   @db.VarChar(50)
   email           String   @unique @db.VarChar(50)
   password        String   @db.VarChar(255)
   isActive        Boolean  @default(false) @map("is_active")
   dataCadastro    DateTime @default(now()) @map("data_cadastro")
   dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
 
-  peladeiro   Peladeiro @relation(fields: [peladeiroId], references: [id])
+  peladeiro Peladeiro @relation(fields: [peladeiroId], references: [id]) // Definição de relacionamento com a Entidade Peladeiro
 
   @@map("usuarios")
 }
@@ -43,24 +43,26 @@ enum FuncaoTatica {
   ATACANTE
 }
 
-/*
-  Entidade que armazena os peladeiros.
-*/
+/**
+ * Entidade que armazena os peladeiros.
+ */
 model Peladeiro {
-  id              Int      @id @default(autoincrement())
-  publicId        String   @unique @default(uuid()) @map("public_id") @db.Uuid
-  nomeCompleto    String   @db.VarChar(150) @map("nome_completo")
-  nomeCamisa      String   @db.VarChar(30) @map("nome_camisa")
-  numeroCamisa    Int?     @map("numero_camisa")
-  funcaoTatica    FuncaoTatica? @map("funcao_tatica")
-  slug            String   @unique @db.VarChar(100)
-  imagem          String?  @db.VarChar(500)
-  status          StatusPeladeiro   @default(ATIVO)
-  dataNascimento  DateTime? @map("data_nascimento")
-  dataCadastro    DateTime @default(now()) @map("data_cadastro")
-  dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
+  id              Int             @id @default(autoincrement())
+  publicId        String          @unique @default(uuid()) @map("public_id") @db.Uuid
+  nomeCompleto    String          @map("nome_completo") @db.VarChar(150)
+  nomeCamisa      String          @map("nome_camisa") @db.VarChar(30)
+  numeroCamisa    Int?            @map("numero_camisa")
+  funcaoTatica    FuncaoTatica?   @map("funcao_tatica")
+  slug            String          @unique @db.VarChar(100)
+  imagem          String?         @db.VarChar(500)
+  status          StatusPeladeiro @default(ATIVO)
+  dataNascimento  DateTime?       @map("data_nascimento")
+  dataCadastro    DateTime        @default(now()) @map("data_cadastro")
+  dataAtualizacao DateTime        @updatedAt @map("data_atualizacao")
 
-  relacionamentos PeladeiroVinculo[]
+  usuario Usuario? // Relacionamento reverso com o usuário
+
+  relacionamentos PeladeiroVinculo[] // Relacionamento reverso com a Entidade PeladeiroVinculo, retornando os N vímulos do peladeiro
 
   @@map("peladeiros")
 }
@@ -71,22 +73,19 @@ enum TipoVinculoPeladeiro {
   CONVIDADO
 }
 
-/*
-  Mantém o vinculo do peladeiro com a pelada (filiado, mensalista, convidado).
-*/
+/**
+ * Mantém o vinculo do peladeiro com a pelada (filiado, mensalista, convidado).
+ */
 model PeladeiroVinculo {
-  id              Int                 @id @default(autoincrement())
-  peladeiroId     Int                 @map("peladeiro_id")
+  id              Int                  @id @default(autoincrement())
+  peladeiroId     Int                  @map("peladeiro_id")
   tipo            TipoVinculoPeladeiro
-  dataInicio      DateTime            @map("data_inicio")
-  dataFim         DateTime?           @map("data_fim")
-  dataCadastro    DateTime            @default(now()) @map("data_cadastro")
-  dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
+  dataInicio      DateTime             @map("data_inicio")
+  dataFim         DateTime?            @map("data_fim")
+  dataCadastro    DateTime             @default(now()) @map("data_cadastro")
+  dataAtualizacao DateTime             @updatedAt @map("data_atualizacao")
 
-  peladeiro Peladeiro @relation(
-    fields: [peladeiroId],
-    references: [id]
-  )
+  peladeiro Peladeiro @relation(fields: [peladeiroId], references: [id]) // Definição de relacionamento com a Entidade Peladeiro
 
   @@index([peladeiroId])
   @@map("peladeiro_vinculos")
@@ -99,9 +98,9 @@ enum StatusEvento {
   CANCELADO
 }
 
-/*
-  Tabela que armazena os eventos da pelada (Futebol, Torneio, Churrasco, etc).
-*/
+/**
+ * Tabela que armazena os eventos da pelada (Futebol, Torneio, Churrasco, etc).
+ */
 model Evento {
   id              Int          @id @default(autoincrement())
   nome            String       @db.VarChar(150)
@@ -110,12 +109,12 @@ model Evento {
   dataFim         DateTime?    @map("data_fim")
   status          StatusEvento @default(AGENDADO)
   dataCadastro    DateTime     @default(now()) @map("data_cadastro")
-  dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
+  dataAtualizacao DateTime     @updatedAt @map("data_atualizacao")
 
-  jogadores       PeladeiroEvento[]
-  times           Time[]
-  partidas        Partida[]
-  movimentacoes   CaixaMovimentacao[]
+  jogadores     PeladeiroEvento[]
+  times         Time[]
+  partidas      Partida[]
+  movimentacoes CaixaMovimentacao[]
 
   @@map("eventos")
 }
@@ -125,19 +124,19 @@ enum StatusPeladeiroEvento {
   NAO_ESCALAVEL
 }
 
-/*
-  Relacionamento entre o peladeiro e o evento.
-  Basicamente é a relação da órdem de chegada dos peladeiros no evento.
-*/
+/**
+ * Relacionamento entre o peladeiro e o evento.
+ * Basicamente é a relação da órdem de chegada dos peladeiros no evento.
+ */
 model PeladeiroEvento {
-  id              Int          @id @default(autoincrement())
-  peladeiroId     Int          @map("peladeiro_id")
-  eventoId        Int          @map("evento_id")
+  id              Int                   @id @default(autoincrement())
+  peladeiroId     Int                   @map("peladeiro_id")
+  eventoId        Int                   @map("evento_id")
   status          StatusPeladeiroEvento @default(ESCALAVEL)
-  registroEntrada   DateTime    @map("registro_entrada")
-  registroSaida   DateTime?    @map("registro_saida")
-  dataCadastro    DateTime     @default(now()) @map("data_cadastro")
-  dataAtualizacao DateTime     @updatedAt @map("data_atualizacao")
+  registroEntrada DateTime              @map("registro_entrada")
+  registroSaida   DateTime?             @map("registro_saida")
+  dataCadastro    DateTime              @default(now()) @map("data_cadastro")
+  dataAtualizacao DateTime              @updatedAt @map("data_atualizacao")
 
   @@map("peladeiro_eventos")
 }
@@ -147,19 +146,19 @@ enum TipoCaixaMovimentacao {
   SAIDA
 }
 
-/*
-  Tabela que armazena as movimentações do caixa da pelada.
-*/
+/**
+ * Tabela que armazena as movimentações do caixa da pelada.
+ */
 model CaixaMovimentacao {
-  id              Int                    @id @default(autoincrement())
-  eventoId        Int                    @map("evento_id")
-  peladeiroId     Int                    @map("peladeiro_id")
-  tipo            TipoCaixaMovimentacao
-  descricao       String                 @db.VarChar(255)
-  valor           Decimal                @db.Decimal(10, 2)
+  id               Int                   @id @default(autoincrement())
+  eventoId         Int                   @map("evento_id")
+  peladeiroId      Int                   @map("peladeiro_id")
+  tipo             TipoCaixaMovimentacao
+  descricao        String                @db.VarChar(255)
+  valor            Decimal               @db.Decimal(10, 2)
   dataMovimentacao DateTime              @map("data_movimentacao")
-  dataCadastro    DateTime               @default(now()) @map("data_cadastro")
-  dataAtualizacao DateTime               @updatedAt @map("data_atualizacao")
+  dataCadastro     DateTime              @default(now()) @map("data_cadastro")
+  dataAtualizacao  DateTime              @updatedAt @map("data_atualizacao")
 
   @@map("caixa_movimentacoes")
 }
@@ -175,46 +174,46 @@ enum StatusMaterial {
   BAIXADO
 }
 
-/*
-  Tabela que armazena os materiais da pelada.
-*/
+/**
+ * Tabela que armazena os materiais da pelada.
+ */
 model Material {
-  id              Int          @id @default(autoincrement())
-  caixaMovimentacaoId Int @map("caixa_movimentacao_id")
-  nome            String       @db.VarChar(150)
-  descricao       String       @db.VarChar(255)
-  status          StatusMaterial?
-  dataAquisicao DateTime? @map("data_aquisicao")
-  dataCadastro    DateTime     @default(now()) @map("data_cadastro")
-  dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
+  id                  Int             @id @default(autoincrement())
+  caixaMovimentacaoId Int             @map("caixa_movimentacao_id")
+  nome                String          @db.VarChar(150)
+  descricao           String          @db.VarChar(255)
+  status              StatusMaterial?
+  dataAquisicao       DateTime?       @map("data_aquisicao")
+  dataCadastro        DateTime        @default(now()) @map("data_cadastro")
+  dataAtualizacao     DateTime        @updatedAt @map("data_atualizacao")
 
   @@map("materiais")
 }
 
-/*
-  Representa a lista de times do evento.
-*/
+/**
+ * Representa a lista de times do evento.
+ */
 model Time {
-  id              Int          @id @default(autoincrement())
-  publicId        String       @unique @default(uuid()) @map("public_id") @db.Uuid
-  nome            String       @db.VarChar(150)
-  imagem          String?      @db.VarChar(500)
-  dataCadastro    DateTime     @default(now()) @map("data_cadastro")
-  data_atualizacao DateTime    @default(now()) @map("data_atualizacao")
- 
+  id               Int      @id @default(autoincrement())
+  publicId         String   @unique @default(uuid()) @map("public_id") @db.Uuid
+  nome             String   @db.VarChar(150)
+  imagem           String?  @db.VarChar(500)
+  dataCadastro     DateTime @default(now()) @map("data_cadastro")
+  data_atualizacao DateTime @default(now()) @map("data_atualizacao")
+
   @@map("times")
 }
 
-/*
-  Tabela que relaciona os peladeiros do evento com seus respectivos times durante o evento. 
-  O peladeiro poder ser escalado em vários times durante o evento. Mas em apenas um time ativo por vez.
-*/
+/**
+ * Tabela que relaciona os peladeiros do evento com seus respectivos times durante o evento.
+ * O peladeiro poder ser escalado em vários times durante o evento. Mas em apenas um time ativo por vez.
+ */
 model PeladeiroEventoTime {
-  id              Int          @id @default(autoincrement())
-  timeId          Int          @map("time_id")
-  PeladeiroEventoId Int        @map("peladeiro_evento_id")
-  dataCadastro    DateTime     @default(now()) @map("data_cadastro")
-  dataAtualizacao DateTime     @default(now()) @map("data_atualizacao")
+  id                Int      @id @default(autoincrement())
+  timeId            Int      @map("time_id")
+  PeladeiroEventoId Int      @map("peladeiro_evento_id")
+  dataCadastro      DateTime @default(now()) @map("data_cadastro")
+  dataAtualizacao   DateTime @default(now()) @map("data_atualizacao")
 
   @@map("peladeiro_evento_times")
 }
@@ -228,26 +227,26 @@ enum StatusPartida {
 }
 
 model Partida {
-  id              Int            @id @default(autoincrement())
-  publicId        String         @unique @default(uuid()) @map("public_id") @db.Uuid
+  id       Int    @id @default(autoincrement())
+  publicId String @unique @default(uuid()) @map("public_id") @db.Uuid
 
-  eventoId        Int            @map("evento_id")
+  eventoId Int @map("evento_id")
 
-  numero          Int?
-  status          StatusPartida  @default(AGUARDANDO)
+  numero Int?
+  status StatusPartida @default(AGUARDANDO)
 
-  inicio          DateTime?
-  fim             DateTime?
+  inicio DateTime?
+  fim    DateTime?
 
-  duracaoMinutos Int?           @map("duracao_minutos")
+  duracaoMinutos Int? @map("duracao_minutos")
 
-  dataCadastro    DateTime       @default(now()) @map("data_cadastro")
-  dataAtualizacao DateTime       @updatedAt @map("data_atualizacao")
+  dataCadastro    DateTime @default(now()) @map("data_cadastro")
+  dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
 
-  evento          Evento         @relation(fields: [eventoId], references: [id])
-  times           PartidaTime[]
-  jogadores       PartidaJogador[]
-  gols            Gol[]
+  evento    Evento           @relation(fields: [eventoId], references: [id])
+  times     PartidaTime[]
+  jogadores PartidaJogador[]
+  gols      Gol[]
 
   @@index([eventoId])
   @@map("partidas")
@@ -259,15 +258,15 @@ enum CorColete {
 }
 
 model PartidaTime {
-  id         Int         @id @default(autoincrement())
-  partidaId  Int         @map("partida_id")
-  timeId     Int         @map("time_id")
-  corColete  CorColete
+  id        Int       @id @default(autoincrement())
+  partidaId Int       @map("partida_id")
+  timeId    Int       @map("time_id")
+  corColete CorColete
 
-  gols       Int         @default(0)
+  gols Int @default(0)
 
-  partida    Partida     @relation(fields: [partidaId], references: [id])
-  time       Time        @relation(fields: [timeId], references: [id])
+  partida Partida @relation(fields: [partidaId], references: [id])
+  time    Time    @relation(fields: [timeId], references: [id])
 
   @@unique([partidaId, timeId])
   @@unique([partidaId, lado])
@@ -283,14 +282,14 @@ model PartidaJogador {
   peladeiroEventoId Int @map("peladeiro_evento_id")
   timeId            Int @map("time_id")
 
-  titular           Boolean @default(true)
+  titular Boolean @default(true)
 
-  partida           Partida          @relation(fields: [partidaId], references: [id])
-  peladeiroEvento   PeladeiroEvento  @relation(fields: [peladeiroEventoId], references: [id])
-  time              Time             @relation(fields: [timeId], references: [id])
+  partida         Partida         @relation(fields: [partidaId], references: [id])
+  peladeiroEvento PeladeiroEvento @relation(fields: [peladeiroEventoId], references: [id])
+  time            Time            @relation(fields: [timeId], references: [id])
 
-  gols              Gol[] @relation("Artilheiro")
-  assistencias      Gol[] @relation("Assistente")
+  gols         Gol[] @relation("Artilheiro")
+  assistencias Gol[] @relation("Assistente")
 
   @@unique([partidaId, peladeiroEventoId])
   @@index([partidaId])
