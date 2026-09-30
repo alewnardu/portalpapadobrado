@@ -10,6 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["portalpapadobrado"]
 }
 
 model Usuario {
@@ -26,6 +27,7 @@ model Usuario {
   peladeiro Peladeiro @relation(fields: [peladeiroId], references: [id]) // Definição de relacionamento com a Entidade Peladeiro
 
   @@map("usuarios")
+  @@schema("portalpapadobrado")
 }
 
 enum StatusPeladeiro {
@@ -34,6 +36,8 @@ enum StatusPeladeiro {
   DEPARTAMENTO_MEDICO
   SUSPENSO
   PROIBIDO
+
+  @@schema("portalpapadobrado")
 }
 
 enum FuncaoTatica {
@@ -41,6 +45,8 @@ enum FuncaoTatica {
   ZAGUEIRO
   MEIO_CAMPO
   ATACANTE
+
+  @@schema("portalpapadobrado")
 }
 
 /**
@@ -69,12 +75,15 @@ model Peladeiro {
   caixaMovimentacoes CaixaMovimentacao[] // Relacionamento reverso com a Entidade CaixaMovimentacao, retornando os N movimentações financeiras do peladeiro
 
   @@map("peladeiros")
+  @@schema("portalpapadobrado")
 }
 
 enum TipoVinculoPeladeiro {
   FILIADO
   MENSALISTA
   CONVIDADO
+
+  @@schema("portalpapadobrado")
 }
 
 /**
@@ -93,6 +102,7 @@ model PeladeiroVinculo {
 
   @@index([peladeiroId])
   @@map("peladeiro_vinculos")
+  @@schema("portalpapadobrado")
 }
 
 enum StatusEvento {
@@ -100,11 +110,15 @@ enum StatusEvento {
   INICIADO
   ENCERRADO
   CANCELADO
+
+  @@schema("portalpapadobrado")
 }
 
 enum TipoEvento {
   PELADA
   TORNEIRO
+
+  @@schema("portalpapadobrado")
 }
 
 /**
@@ -126,11 +140,14 @@ model Evento {
   caixaMovimentacoes CaixaMovimentacao[] // Relacionamento reverso com a Entidade CaixaMovimentacao, retornando os N movimentações financeiras do evento
 
   @@map("eventos")
+  @@schema("portalpapadobrado")
 }
 
 enum StatusPeladeiroEvento {
   ESCALAVEL
   NAO_ESCALAVEL
+
+  @@schema("portalpapadobrado")
 }
 
 /**
@@ -156,16 +173,21 @@ model PeladeiroEvento {
   @@index([peladeiroId])
   @@index([eventoId])
   @@map("peladeiro_eventos")
+  @@schema("portalpapadobrado")
 }
 
 enum TipoCaixaMovimentacao {
   ENTRADA
   SAIDA
+
+  @@schema("portalpapadobrado")
 }
 
 enum StatusCaixaMovimentacao {
   PENDENTE
   PAGO
+
+  @@schema("portalpapadobrado")
 }
 
 /**
@@ -190,6 +212,7 @@ model CaixaMovimentacao {
   recursoMaterial RecursoMaterial? // Relacionamento reverso com a Entidade RecursoMaterial, retornando o recurso material, quando houver, que originou a movimentação do caixa
 
   @@map("caixa_movimentacoes")
+  @@schema("portalpapadobrado")
 }
 
 enum StatusMaterial {
@@ -199,11 +222,15 @@ enum StatusMaterial {
   MANUTENCAO
   EXTRAVIADO
   BAIXADO
+
+  @@schema("portalpapadobrado")
 }
 
 enum OrigemRecursoMaterial {
   AQUISICAO
   DOACAO
+
+  @@schema("portalpapadobrado")
 }
 
 /**
@@ -223,6 +250,7 @@ model RecursoMaterial {
   caixaMovimentacao CaixaMovimentacao? @relation(fields: [caixaMovimentacaoId], references: [id]) // Definição de relacionamento com a Entidade CaixaMovimentacao
 
   @@map("recursos_materials")
+  @@schema("portalpapadobrado")
 }
 
 /**
@@ -240,6 +268,7 @@ model Time {
   partidas  PartidaTime[] // Relacionamento reverso com a Entidade PartidaTime, retornando os N relacionamentos com PartidaTime, que dá acesso às Partidas e aos times, respectivamente
 
   @@map("times")
+  @@schema("portalpapadobrado")
 }
 
 /**
@@ -257,6 +286,7 @@ model PeladeiroEventoTime {
   time            Time            @relation(fields: [timeId], references: [id]) // Definição de relacionamento com a Entidade Time
 
   @@map("peladeiro_evento_times")
+  @@schema("portalpapadobrado")
 }
 
 enum StatusPartida {
@@ -265,6 +295,8 @@ enum StatusPartida {
   EM_ANDAMENTO
   ENCERRADA
   CANCELADA
+
+  @@schema("portalpapadobrado")
 }
 
 model Partida {
@@ -282,11 +314,14 @@ model Partida {
 
   @@index([eventoId])
   @@map("partidas")
+  @@schema("portalpapadobrado")
 }
 
 enum OpcoesCorColete {
   AZUL
   PRETO
+
+  @@schema("portalpapadobrado")
 }
 
 model PartidaTime {
@@ -302,6 +337,7 @@ model PartidaTime {
   @@unique([partidaId, corDoColete])
   @@index([timeId])
   @@map("partidas_times")
+  @@schema("portalpapadobrado")
 }
 
 model Gol {
@@ -310,4 +346,5 @@ model Gol {
   dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
 
   @@map("gols")
+  @@schema("portalpapadobrado")
 }
